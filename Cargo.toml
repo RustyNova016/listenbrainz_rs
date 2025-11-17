@@ -1,8 +1,8 @@
 [package]
 name = "listenbrainz_rs_nova"
-version = "0.7.1"
-authors = ["Koen Bolhuis <koen.bolhuis@gmail.com>", "RustyNova"]
-edition = "2021"
+version = "0.8.0"
+authors = ["RustyNova"]
+edition = "2024"
 license = "MIT"
 repository = "https://github.com/RustyNova016/listenbrainz-rs.git"
 homepage = "https://github.com/RustyNova016/listenbrainz-rs"
@@ -11,11 +11,36 @@ description = "ListenBrainz API bindings for Rust"
 keywords = ["listenbrainz", "api", "bindings"]
 categories = ["api-bindings"]
 publish = true
+rust-version = "1.85.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-thiserror = "1"
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-attohttpc = { version = "0.27", features = ["json"] }
+reqwest = "0.12.24"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.145"
+
+governor = { version = "0.10.0", optional = true }  
+snafu = {version = "0.8.9", features = ["rust_1_81"]}
+
+# Debuging
+tracingc = {package = "tracing", version = "0.1.41", optional = true}
+
+# --- Required for error downcasting ---
+hyper-util = "0.1.17"
+hyper = "1.7.0"
+
+# Others
+async-io = "2.6.0"
+bon = "3.8.1"
+
+[dev-dependencies]
+tokio = { version = "1.38.0", features = ["full"] }
+serial_test = "3.1.1"
+
+
+[features]
+default = ["rate_limit"]
+rate_limit = ["governor"]
+backtrace = []
+tracing = ["tracingc", "async-io/tracing"]
