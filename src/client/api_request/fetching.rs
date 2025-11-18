@@ -19,9 +19,14 @@ impl<T> ApiRequest<T> {
     ) -> Result<Response, ApiRequestError> {
         debug_assert_eq!(self.verb, HTTPVerb::Get);
 
+        let url = format!("https://{}{}", client.api_domain, &self.url);
+
+        #[cfg(feature = "tracing")]
+        tracing::debug!("Sending GET request at {url}");
+
         client
             .reqwest_client
-            .get(format!("https://{}{}", client.api_domain, &self.url))
+            .get(url)
             .send()
             .await
             .context(ReqwestSnafu)
