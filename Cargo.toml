@@ -34,6 +34,12 @@ hyper = "1.7.0"
 async-io = "2.6.0"
 bon = "3.8.1"
 mutants = "0.0.3"
+async-channel = "2.5.0"
+futures-lite = "2.6.1"
+async-executor = "1.13.3"
+futures = "0.3.31"
+streamies = "0.2.2"
+chrono = "0.4.42"
 
 [dev-dependencies]
 tokio = { version = "1.38.0", features = ["full"] }
