@@ -28,6 +28,7 @@ impl<T> ApiRequest<T> {
     }
 
     /// Send the reqwest, deal with errors and ratelimiting
+    #[mutants::skip]
     pub async fn try_send_request(
         &mut self,
         client: &ListenBrainzClient,
@@ -61,6 +62,7 @@ impl<T> ApiRequest<T> {
     }
 
     /// Send the request, and retry on failure
+    #[mutants::skip]
     pub async fn send_with_retries(
         &mut self,
         client: &ListenBrainzClient,

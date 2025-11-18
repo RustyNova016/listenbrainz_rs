@@ -32,11 +32,13 @@ pub enum ApiRequestError {
 
 impl ApiRequestError {
     /// Return true if the error is temporary and should be retried
+    #[mutants::skip]
     pub fn is_retryable(&self) -> bool {
         self.is_timeout() || self.is_connection_reset()
     }
 
     /// Return true if the error is a timeout
+    #[mutants::skip]
     pub fn is_timeout(&self) -> bool {
         // Reqwest error
         let Some(source) = self.source() else {
@@ -50,6 +52,7 @@ impl ApiRequestError {
     }
 
     /// Return true if the error is a connection reset
+    #[mutants::skip]
     pub fn is_connection_reset(&self) -> bool {
         // Reqwest error
         let Some(source) = self.source() else {

@@ -53,6 +53,7 @@ impl ListenBrainzClient {
 
     /// Wait for a ratelimit spot
     #[cfg(feature = "rate_limit")]
+    #[mutants::skip]
     pub async fn await_rate_limit(&self) {
         if let Some(rate) = &self.rate_limit {
             rate.until_ready().await

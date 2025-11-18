@@ -33,6 +33,7 @@ hyper = "1.7.0"
 # Others
 async-io = "2.6.0"
 bon = "3.8.1"
+mutants = "0.0.3"
 
 [dev-dependencies]
 tokio = { version = "1.38.0", features = ["full"] }
