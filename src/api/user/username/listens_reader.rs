@@ -83,7 +83,7 @@ mod test {
     #[tokio::test]
     #[serial_test::serial]
     async fn get_user_username_listens_test() {
-        let client = ListenBrainzClient::new();
+        let client = ListenBrainzClient::default();
 
         let req = ListenBrainzAPI::get_user_username_listens_full()
             .client(&client)

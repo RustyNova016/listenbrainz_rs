@@ -100,7 +100,7 @@ mod test {
     #[tokio::test]
     #[serial_test::serial]
     async fn get_user_username_listens_test() {
-        let client = ListenBrainzClient::new();
+        let client = ListenBrainzClient::default();
 
         let mut req = ListenBrainzAPI::get_user_username_listens().username("RustyNova").min_ts(1763396995).max_ts(1763396997).count(1).call();
         let mut res = req.send(&client).await.unwrap();
