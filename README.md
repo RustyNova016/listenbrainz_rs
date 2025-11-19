@@ -1,6 +1,12 @@
-# Listenbrainz-rs-nova
+# Listenbrainz_rs
 
 Api bindings for the listenbrainz api
+
+# Features
+
+- rate_limit(default): Add a ratelimit to the api queries
+- backtrace: Add backtraces to the errors
+- tracing: Add tracing support 
 
 ## Why another crate? What's so special about it?
 
