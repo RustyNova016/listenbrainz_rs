@@ -27,9 +27,6 @@ impl<T> ApiRequest<T> {
         // };
 
         // Not a server error? Then it's a problem with our models. Let's send the serde error
-        Err(err).with_context(|_| InvalidResponseSnafu {
-            data: text,
-        })
-
+        Err(err).with_context(|_| InvalidResponseSnafu { data: text })
     }
 }
