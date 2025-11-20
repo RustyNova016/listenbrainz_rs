@@ -1,0 +1,20 @@
+[repository.listenbrainz_rs]
+path="./"
+default_branch="master"
+
+    [repository.listenbrainz_rs.release]
+    git_cliff = true
+
+    [repository.listenbrainz_rs.rust]
+    fmt = true
+    clippy_hack = true
+    sqlx = false
+
+    [repository.listenbrainz_rs.rust.ci]
+    fmt = true
+    clippy = true
+    test = true
+    nextest = false
+    msrv = true
+    machete = true
+    #semver = true <- Need nightly as well but break CI...

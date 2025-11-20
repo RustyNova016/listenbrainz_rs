@@ -2,7 +2,6 @@ use core::error::Error as _;
 
 use snafu::Snafu;
 
-
 #[derive(Debug, Snafu)]
 #[snafu(visibility(pub(super)))]
 pub enum ApiRequestError {
@@ -14,7 +13,9 @@ pub enum ApiRequestError {
         backtrace: snafu::Backtrace,
     },
 
-    #[snafu(display("The max retry count for the request as been exeeded. You may want to check if the correct url is set, the server is online, or you aren't hitting the ratelimit."))]
+    #[snafu(display(
+        "The max retry count for the request as been exeeded. You may want to check if the correct url is set, the server is online, or you aren't hitting the ratelimit."
+    ))]
     MaxRetriesExceeded {
         #[cfg(feature = "backtrace")]
         backtrace: snafu::Backtrace,
@@ -27,7 +28,7 @@ pub enum ApiRequestError {
 
         #[cfg(feature = "backtrace")]
         backtrace: snafu::Backtrace,
-    }
+    },
 }
 
 impl ApiRequestError {
