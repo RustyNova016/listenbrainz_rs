@@ -1,14 +1,15 @@
 use core::time::Duration;
 
 use async_io::Timer;
-use reqwest::Response;
 use snafu::ResultExt;
+use ureq::Body;
+use ureq::http::Response;
 
 use crate::client::ListenBrainzClient;
 use crate::client::api_request::ApiRequest;
 use crate::client::api_request::error::ApiRequestError;
 use crate::client::api_request::error::MaxRetriesExceededSnafu;
-use crate::client::api_request::error::ReqwestSnafu;
+use crate::client::api_request::error::UreqSnafu;
 use crate::client::http_verb::HTTPVerb;
 
 impl<T> ApiRequest<T> {
@@ -16,7 +17,7 @@ impl<T> ApiRequest<T> {
     pub async fn send_request_raw(
         &self,
         client: &ListenBrainzClient,
-    ) -> Result<Response, ApiRequestError> {
+    ) -> Result<Response<Body>, ApiRequestError> {
         debug_assert_eq!(self.verb, HTTPVerb::Get);
 
         let url = format!("https://{}{}", client.api_domain, &self.url);
@@ -24,20 +25,23 @@ impl<T> ApiRequest<T> {
         #[cfg(feature = "tracing")]
         tracing::debug!("Sending GET request at {url}");
 
-        client
-            .reqwest_client
-            .get(url)
-            .send()
-            .await
-            .context(ReqwestSnafu)
+        blocking::unblock(|| {
+            ureq::get(url)
+                .config()
+                .http_status_as_error(false)
+                .build()
+                .call()
+        })
+        .await
+        .context(UreqSnafu)
     }
 
-    /// Send the reqwest, deal with errors and ratelimiting
+    /// Send the request, deal with errors and ratelimiting
     #[mutants::skip]
     pub async fn try_send_request(
         &mut self,
         client: &ListenBrainzClient,
-    ) -> Result<Option<Response>, ApiRequestError> {
+    ) -> Result<Option<Response<Body>>, ApiRequestError> {
         client.await_rate_limit().await;
         self.tries += 1;
 
@@ -71,7 +75,7 @@ impl<T> ApiRequest<T> {
     pub async fn send_with_retries(
         &mut self,
         client: &ListenBrainzClient,
-    ) -> Result<Response, ApiRequestError> {
+    ) -> Result<Response<Body>, ApiRequestError> {
         while self.tries < client.max_retries {
             if let Some(res) = self.try_send_request(client).await? {
                 return Ok(res);

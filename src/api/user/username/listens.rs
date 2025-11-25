@@ -93,11 +93,12 @@ pub struct UserListensMappingArtist {
 #[cfg(test)]
 mod test {
 
+    use macro_rules_attribute::apply;
+
     use crate::api::ListenBrainzAPI;
     use crate::client::ListenBrainzClient;
 
-    #[tokio::test]
-    #[serial_test::serial]
+    #[apply(smol_macros::test!)]
     async fn get_user_username_listens_test() {
         let client = ListenBrainzClient::default();
 
