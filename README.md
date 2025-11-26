@@ -21,4 +21,5 @@ This crate is focus on aspects lacking from [listenbrainz](https://crates.io/cra
 - Api similar to [musicbrainz_rs](https://crates.io/crates/musicbrainz_rs)
 - Builder pattern for query parameters using [bon](https://crates.io/crates/bon)
 - Paranoid CI suite
+- Runtime agnostic (This crate use [`blocking`](https://crates.io/crates/blocking) to turn [`ureq`](https://crates.io/crates/ureq)'s blocking requests into async ones by spawning classic `std` threads. However those threads do nothing while waiting for the response, so it's fine to spawn more than the number of cores in the cpu)
 

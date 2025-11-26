@@ -15,7 +15,6 @@ use governor::middleware::NoOpMiddleware;
 use governor::state::InMemoryState;
 #[cfg(feature = "rate_limit")]
 use governor::state::NotKeyed;
-use reqwest::Client;
 
 pub mod api_request;
 pub mod http_verb;
@@ -23,10 +22,6 @@ pub mod http_verb;
 /// The client handling fetching
 #[derive(Debug, bon::Builder)]
 pub struct ListenBrainzClient {
-    /// The inner reqwest client
-    #[builder(default = Client::new())]
-    reqwest_client: Client,
-
     /// The domain of the listenbrainz api
     #[builder(default = "api.listenbrainz.org".to_string())]
     api_domain: String,

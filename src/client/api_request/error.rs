@@ -6,8 +6,8 @@ use snafu::Snafu;
 #[snafu(visibility(pub(super)))]
 pub enum ApiRequestError {
     #[snafu(display("Couldn't successfully send the http request"))]
-    ReqwestError {
-        source: reqwest::Error,
+    UreqError {
+        source: ureq::Error,
 
         #[cfg(feature = "backtrace")]
         backtrace: snafu::Backtrace,
@@ -45,46 +45,26 @@ impl ApiRequestError {
         let Some(source) = self.source() else {
             return false;
         };
-        let Some(reqwest_error) = source.downcast_ref::<reqwest::Error>() else {
+
+        let Some(ureq_error) = source.downcast_ref::<ureq::Error>() else {
             return false;
         };
 
-        reqwest_error.is_timeout()
+        matches!(ureq_error, ureq::Error::Timeout(_))
     }
 
     /// Return true if the error is a connection reset
     #[mutants::skip]
     pub fn is_connection_reset(&self) -> bool {
-        // Reqwest error
         let Some(source) = self.source() else {
             return false;
         };
-        let Some(reqwest_error) = source.downcast_ref::<reqwest::Error>() else {
+
+        let Some(ureq_error) = source.downcast_ref::<ureq::Error>() else {
             return false;
         };
 
-        // Hyper_util error
-        let Some(source) = reqwest_error.source() else {
-            return false;
-        };
-        let Some(hyper_util_error) = source.downcast_ref::<hyper_util::client::legacy::Error>()
-        else {
-            return false;
-        };
-
-        // Hyper error
-        let Some(source) = hyper_util_error.source() else {
-            return false;
-        };
-        let Some(hyper_error) = source.downcast_ref::<hyper::Error>() else {
-            return false;
-        };
-
-        // IO error
-        let Some(source) = hyper_error.source() else {
-            return false;
-        };
-        let Some(std_error) = source.downcast_ref::<std::io::Error>() else {
+        let ureq::Error::Io(std_error) = ureq_error else {
             return false;
         };
 
