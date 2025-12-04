@@ -16,6 +16,7 @@ rust-version = "1.85.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+api_bindium = {version = "0.1.0", git = "https://github.com/RustyNova016/api_bindium", rev = "d7e9738b55c8d0a11644663b1c1088447ce16122"}
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.145"
 
@@ -28,6 +29,7 @@ async-io = "2.6.0"
 
 # Debuging
 tracing = {version = "0.1.41", optional = true}
+hotpath = { version = "0.7.3", optional = true }
 
 # Others
 bon = "3.8.1"
@@ -40,7 +42,19 @@ smol-macros = "0.1.1"
 macro_rules_attribute = "0.2.2"
 
 [features]
-default = ["rate_limit"]
-rate_limit = ["dep:governor"]
-backtrace = []
-tracing = ["dep:tracing", "async-io/tracing"]
+default = ["async"]
+
+# Async
+sync = ["api_bindium/sync"]
+async = ["api_bindium/async"]
+
+# Fetching
+native_tls = ["api_bindium/native_tls"]
+rate_limit = ["api_bindium/rate_limit"]
+
+# Debugging
+backtrace = ["api_bindium/backtrace"]
+tracing = ["dep:tracing"]
+hotpath = ["dep:hotpath", "hotpath/hotpath", "api_bindium/hotpath"]
+hotpath-alloc = ["hotpath/hotpath-alloc", "api_bindium/hotpath-alloc"]
+hotpath-off = ["hotpath/hotpath-off", "api_bindium/hotpath-off"]

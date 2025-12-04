@@ -47,3 +47,23 @@ jobs:
 
       - name: Run berger ci
         run: cargo-berger rust ci
+
+  clippy:
+    env: 
+      SQLX_OFFLINE: true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      # Install minimal toolchain
+      - name: Install minimal stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - uses: Swatinem/rust-cache@v2
+
+      - uses: taiki-e/install-action@cargo-hack
+
+      - name: Run clippy
+        run: cargo hack clippy --each-feature --skip hotpath,hotpath-alloc,hotpath-off -- -D warnings
