@@ -26,6 +26,10 @@ snafu = {version = "0.8.9", features = ["rust_1_81"]}
 # async
 blocking = "1.6.2"
 async-io = "2.6.0"
+streamies = {version = "0.3.0", default-features = false, features = ["smol"]}
+futures-lite = "2.6.1"
+async-lock = "3.4.1"
+async-executor = "1.13.3"
 
 # Debuging
 tracing = {version = "0.1.41", optional = true}
