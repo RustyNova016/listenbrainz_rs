@@ -1,24 +1,28 @@
+use api_bindium::ApiRequestError;
 use chrono::Utc;
+use snafu::ResultExt;
+use snafu::Snafu;
+use ureq::http::uri::InvalidUri;
 
-use crate::api::ListenBrainzAPI;
+use crate::api::ListenBrainzAPIEnpoints;
 use crate::api::user::username::listens::UserListensListen;
 use crate::api::user::username::listens::UserListensResponse;
 use crate::client::ListenBrainzClient;
-use crate::client::api_request::error::ApiRequestError;
 
 #[bon::bon]
-impl ListenBrainzAPI {
+impl ListenBrainzAPIEnpoints {
     /// Get all the listens in a time period, removing the paging.
     ///
     /// Due to implementation details and quirks in the API, the listens may not be sorted,
     /// or require more queries than neccesary
+
     #[builder]
     pub async fn get_user_username_listens_full<'s>(
         client: &'s ListenBrainzClient,
         username: &'s str,
         start: Option<u64>,
         end: Option<u64>,
-    ) -> Result<Vec<UserListensListen>, ApiRequestError> {
+    ) -> Result<Vec<UserListensListen>, ListenFullFetchError> {
         let mut works = vec![(
             start.unwrap_or_default(),
             end.unwrap_or_else(|| Utc::now().timestamp() as u64),
@@ -58,35 +62,66 @@ impl ListenBrainzAPI {
     }
 }
 
+#[cfg(feature = "async")]
+#[cfg_attr(feature = "hotpath", hotpath::measure)]
 async fn send_request(
     client: &ListenBrainzClient,
     username: &str,
     start: u64,
     end: u64,
-) -> Result<UserListensResponse, ApiRequestError> {
-    let mut req = ListenBrainzAPI::get_user_username_listens()
+) -> Result<UserListensResponse, ListenFullFetchError> {
+    let mut req = client
+        .endpoints()
+        .get_user_username_listens()
         .username(username)
         .min_ts(start)
         .max_ts(end)
         .count(1000)
-        .call();
+        .call()
+        .context(InvalidUriSnafu)?;
 
-    req.send(client).await
+    req.send_async(client.api_client())
+        .await
+        .context(ApiRequestSnafu)
 }
 
+#[derive(Debug, Snafu)]
+pub enum ListenFullFetchError {
+    ApiRequestError {
+        source: ApiRequestError,
+
+        #[cfg(feature = "backtrace")]
+        backtrace: snafu::Backtrace,
+    },
+
+    InvalidUriError {
+        source: InvalidUri,
+
+        #[cfg(feature = "backtrace")]
+        backtrace: snafu::Backtrace,
+    },
+}
+
+#[cfg(feature = "async")]
 #[cfg(test)]
 mod test {
 
     use macro_rules_attribute::apply;
 
-    use crate::api::ListenBrainzAPI;
+    use crate::api::ListenBrainzAPIEnpoints;
     use crate::client::ListenBrainzClient;
 
     #[apply(smol_macros::test!)]
     async fn get_user_username_listens_test() {
+        #[cfg(feature = "hotpath")]
+        let _hotpath = hotpath::GuardBuilder::new("test_async_function")
+            .percentiles(&[50, 90, 95])
+            .format(hotpath::Format::Table)
+            .build();
+
         let client = ListenBrainzClient::default();
 
-        let req = ListenBrainzAPI::get_user_username_listens_full()
+        let req = ListenBrainzAPIEnpoints::get_user_username_listens_full()
             .client(&client)
             .username("RustyNova")
             .start(1705000000)
