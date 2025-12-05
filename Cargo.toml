@@ -49,7 +49,7 @@ rate_limit = ["api_bindium/rate_limit"]
 
 # Debugging
 backtrace = ["api_bindium/backtrace"]
-tracing = ["api_bindium/tracing", "dep:tracing"]
+tracing = ["api_bindium/tracing", "dep:tracing", "dep:tracing-indicatif"]
 hotpath = ["dep:hotpath", "hotpath/hotpath", "api_bindium/hotpath"]
 hotpath-alloc = ["hotpath/hotpath-alloc", "api_bindium/hotpath-alloc"]
 hotpath-off = ["hotpath/hotpath-off", "api_bindium/hotpath-off"]

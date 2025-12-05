@@ -28,8 +28,9 @@ macro_rules! pg_inc {
         #[cfg(feature = "tracing")]
         {
             use tracing::Span;
+            use tracing_indicatif::span_ext::IndicatifSpanExt as _;
 
-            Span::current().pb_inc($inc);
+            Span::current().pb_inc($inc as u64);
         }
     };
 }
