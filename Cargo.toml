@@ -23,6 +23,8 @@ snafu = {version = "0.8.9", features = ["rust_1_81"]}
 
 # Debuging
 hotpath = { version = "0.7.3", optional = true }
+tracing = {version = "0.1.41", optional = true}
+tracing-indicatif = {version = "0.3.14", optional = true}
 
 # Others
 bon = "3.8.1"
@@ -35,7 +37,7 @@ smol-macros = "0.1.1"
 macro_rules_attribute = "0.2.2"
 
 [features]
-default = ["async"]
+default = []
 
 # Async
 sync = ["api_bindium/sync"]
@@ -47,7 +49,7 @@ rate_limit = ["api_bindium/rate_limit"]
 
 # Debugging
 backtrace = ["api_bindium/backtrace"]
-tracing = ["api_bindium/tracing"]
+tracing = ["api_bindium/tracing", "dep:tracing"]
 hotpath = ["dep:hotpath", "hotpath/hotpath", "api_bindium/hotpath"]
 hotpath-alloc = ["hotpath/hotpath-alloc", "api_bindium/hotpath-alloc"]
 hotpath-off = ["hotpath/hotpath-off", "api_bindium/hotpath-off"]

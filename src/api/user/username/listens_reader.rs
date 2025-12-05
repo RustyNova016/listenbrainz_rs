@@ -8,6 +8,8 @@ use crate::api::ListenBrainzAPIEnpoints;
 use crate::api::user::username::listens::UserListensListen;
 use crate::api::user::username::listens::UserListensResponse;
 use crate::client::ListenBrainzClient;
+use crate::inner_macros::pg_counted;
+use crate::inner_macros::pg_inc;
 
 #[bon::bon]
 impl ListenBrainzAPIEnpoints {
@@ -17,12 +19,15 @@ impl ListenBrainzAPIEnpoints {
     /// or require more queries than neccesary
 
     #[builder]
+    #[cfg_attr(feature = "tracing", tracing::instrument(skip(client), fields(indicatif.pb_show = tracing::field::Empty)))]
     pub async fn get_user_username_listens_full<'s>(
         client: &'s ListenBrainzClient,
         username: &'s str,
         start: Option<u64>,
         end: Option<u64>,
     ) -> Result<Vec<UserListensListen>, ListenFullFetchError> {
+        pg_counted!(1, "Fetching listens");
+
         let mut works = vec![(
             start.unwrap_or_default(),
             end.unwrap_or_else(|| Utc::now().timestamp() as u64),
@@ -33,6 +38,7 @@ impl ListenBrainzAPIEnpoints {
         while let Some((start, end)) = works.pop() {
             // Prevent fetching a period that is before any listen
             if min_start.is_some_and(|min_start| end < min_start) {
+                pg_inc!();
                 continue;
             }
 
@@ -41,6 +47,8 @@ impl ListenBrainzAPIEnpoints {
                 let middle = ((end - start) / 2) + start;
                 works.push((start, middle + 1));
                 works.push((middle, end));
+                pg_inc!();
+                pg_counted!(works.len(), "Fetching listens");
                 continue;
             }
 
@@ -53,8 +61,11 @@ impl ListenBrainzAPIEnpoints {
                 let middle = ((end - start) / 2) + start;
                 works.push((start, middle + 1));
                 works.push((middle, end));
+                pg_inc!();
+                pg_counted!(works.len(), "Fetching listens");
             } else {
                 listens.extend(res.payload.listens);
+                pg_inc!();
             }
         }
 
