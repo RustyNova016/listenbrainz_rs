@@ -1,50 +1,38 @@
-#[cfg(feature = "rate_limit")]
-use core::num::NonZeroU32;
-#[cfg(feature = "rate_limit")]
+#[cfg(feature = "async")]
 use std::sync::Arc;
 
-#[cfg(feature = "rate_limit")]
-use governor::Quota;
-#[cfg(feature = "rate_limit")]
-use governor::RateLimiter;
-#[cfg(feature = "rate_limit")]
-use governor::clock;
-#[cfg(feature = "rate_limit")]
-use governor::middleware::NoOpMiddleware;
-#[cfg(feature = "rate_limit")]
-use governor::state::InMemoryState;
-#[cfg(feature = "rate_limit")]
-use governor::state::NotKeyed;
+use api_bindium::ApiClient;
+#[cfg(feature = "async")]
+use async_executor::Executor;
 
-pub mod api_request;
-pub mod http_verb;
+use crate::api::ListenBrainzAPIEnpoints;
 
-/// The client handling fetching
-#[derive(Debug, bon::Builder)]
+#[derive(Debug, bon::Builder, Clone)]
 pub struct ListenBrainzClient {
-    /// The domain of the listenbrainz api
-    #[builder(default = "api.listenbrainz.org".to_string())]
-    api_domain: String,
+    #[builder(default)]
+    api_client: ApiClient,
 
-    /// How many retries allowed before erroring out the request?
-    #[builder(default = 10)]
-    max_retries: u32,
+    /// An async concurent [Executor] of the api. You can reuse your own to prevent duplicated runtimes
+    #[cfg(feature = "async")]
+    #[builder(default)]
+    async_executor: Arc<Executor<'static>>,
 
-    /// The inner ratelimiter
-    #[cfg(feature = "rate_limit")]
-    #[cfg_attr(feature = "rate_limit", builder(required, default = Some(default_ratelimit())))]
-    pub rate_limit:
-        Option<Arc<RateLimiter<NotKeyed, InMemoryState, clock::DefaultClock, NoOpMiddleware>>>,
+    #[builder(default)]
+    endpoints: ListenBrainzAPIEnpoints,
 }
 
 impl ListenBrainzClient {
-    /// Wait for a ratelimit spot
-    #[cfg(feature = "rate_limit")]
-    #[mutants::skip]
-    pub async fn await_rate_limit(&self) {
-        if let Some(rate) = &self.rate_limit {
-            rate.until_ready().await
-        }
+    pub fn endpoints(&self) -> &ListenBrainzAPIEnpoints {
+        &self.endpoints
+    }
+
+    pub fn api_client(&self) -> &ApiClient {
+        &self.api_client
+    }
+
+    #[cfg(feature = "async")]
+    pub fn async_executor(&self) -> &Arc<Executor<'static>> {
+        &self.async_executor
     }
 }
 
@@ -52,12 +40,4 @@ impl Default for ListenBrainzClient {
     fn default() -> Self {
         Self::builder().build()
     }
-}
-
-#[cfg(feature = "rate_limit")]
-fn default_ratelimit()
--> Arc<RateLimiter<NotKeyed, InMemoryState, clock::DefaultClock, NoOpMiddleware>> {
-    let quota =
-        Quota::per_second(NonZeroU32::new(1).unwrap()).allow_burst(NonZeroU32::new(5).unwrap());
-    Arc::new(RateLimiter::direct(quota))
 }

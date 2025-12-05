@@ -1,37 +1,29 @@
 use std::collections::HashMap;
-use std::fmt::Write;
 
+use api_bindium::ApiRequest;
+use api_bindium::HTTPVerb;
 use serde::Deserialize;
 use serde::Serialize;
+use ureq::http::uri::InvalidUri;
 
-use crate::api::ListenBrainzAPI;
-use crate::client::api_request::ApiRequest;
-use crate::client::http_verb::HTTPVerb;
+use crate::api::ListenBrainzAPIEnpoints;
 
 #[bon::bon]
-impl ListenBrainzAPI {
+impl ListenBrainzAPIEnpoints {
     #[builder]
     pub fn get_user_username_listens(
+        &self,
         username: &str,
         max_ts: Option<u64>,
         min_ts: Option<u64>,
         count: Option<u64>,
-    ) -> ApiRequest<UserListensResponse> {
-        let mut url = format!("/1/user/{username}/listens?");
-
-        if let Some(max_ts) = max_ts {
-            write!(url, "max_ts={}&", max_ts).unwrap();
-        }
-
-        if let Some(min_ts) = min_ts {
-            write!(url, "min_ts={}&", min_ts).unwrap();
-        }
-
-        if let Some(count) = count {
-            write!(url, "count={}&", count).unwrap();
-        }
-
-        ApiRequest::new(url, HTTPVerb::Get)
+    ) -> Result<ApiRequest<UserListensResponse>, InvalidUri> {
+        self.endpoint_builder()
+            .set_path(&format!("/1/user/{username}/listens"))
+            .maybe_add_parameter("max_ts", max_ts)
+            .maybe_add_parameter("min_ts", min_ts)
+            .maybe_add_parameter("count", count)
+            .into_api_request(HTTPVerb::Get)
     }
 }
 
@@ -91,24 +83,28 @@ pub struct UserListensMappingArtist {
 }
 
 #[cfg(test)]
+#[cfg(feature = "async")]
 mod test {
 
     use macro_rules_attribute::apply;
 
-    use crate::api::ListenBrainzAPI;
     use crate::client::ListenBrainzClient;
 
     #[apply(smol_macros::test!)]
+
     async fn get_user_username_listens_test() {
         let client = ListenBrainzClient::default();
 
-        let mut req = ListenBrainzAPI::get_user_username_listens()
+        let mut req = client
+            .endpoints()
+            .get_user_username_listens()
             .username("RustyNova")
             .min_ts(1763396995)
             .max_ts(1763396997)
             .count(1)
-            .call();
-        let mut res = req.send(&client).await.unwrap();
+            .call()
+            .unwrap();
+        let mut res = req.send_async(client.api_client()).await.unwrap();
 
         assert_eq!(res.payload.count, 1);
 
