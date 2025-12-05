@@ -1,6 +1,8 @@
+#[cfg(feature = "async")]
 use std::sync::Arc;
 
 use api_bindium::ApiClient;
+#[cfg(feature = "async")]
 use async_executor::Executor;
 
 use crate::api::ListenBrainzAPIEnpoints;
@@ -11,6 +13,7 @@ pub struct ListenBrainzClient {
     api_client: ApiClient,
 
     /// An async concurent [Executor] of the api. You can reuse your own to prevent duplicated runtimes
+    #[cfg(feature = "async")]
     #[builder(default)]
     async_executor: Arc<Executor<'static>>,
 
@@ -27,6 +30,7 @@ impl ListenBrainzClient {
         &self.api_client
     }
 
+    #[cfg(feature = "async")]
     pub fn async_executor(&self) -> &Arc<Executor<'static>> {
         &self.async_executor
     }

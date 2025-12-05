@@ -10,7 +10,7 @@ impl ListenBrainzAPIEnpoints {
         recording_mbids: Vec<String>,
     ) -> Result<ApiRequest<Vec<PopularityRecordingResponse>>, InvalidUri> {
         self.endpoint_builder()
-            .set_path(&format!("/1/popularity/recording"))
+            .set_path("/1/popularity/recording")
             .into_api_request_with_body(
                 HTTPVerb::Post,
                 serde_json::to_value(PopularityRecordingQuery { recording_mbids }).unwrap(),

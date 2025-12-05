@@ -1,8 +1,8 @@
 use api_bindium::endpoints::EndpointUriBuilder;
 use api_bindium::endpoints::path::EndpointUriBuilderPath;
 
-pub mod user;
 pub mod popularity;
+pub mod user;
 
 #[derive(Debug, bon::Builder, Clone)]
 pub struct ListenBrainzAPIEnpoints {
