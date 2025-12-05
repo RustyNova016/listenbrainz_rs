@@ -38,7 +38,6 @@ impl ListenBrainzAPIEnpoints {
         while let Some((start, end)) = works.pop() {
             // Prevent fetching a period that is before any listen
             if min_start.is_some_and(|min_start| end < min_start) {
-                pg_inc!();
                 continue;
             }
 
@@ -47,12 +46,11 @@ impl ListenBrainzAPIEnpoints {
                 let middle = ((end - start) / 2) + start;
                 works.push((start, middle + 1));
                 works.push((middle, end));
-                pg_inc!();
-                pg_counted!(works.len(), "Fetching listens");
                 continue;
             }
 
             let res = send_request(client, username, start, end).await?;
+            pg_counted!(res.payload.count, "Fetching listens");
 
             min_start = Some(res.payload.oldest_listen_ts as u64);
 
@@ -61,11 +59,9 @@ impl ListenBrainzAPIEnpoints {
                 let middle = ((end - start) / 2) + start;
                 works.push((start, middle + 1));
                 works.push((middle, end));
-                pg_inc!();
-                pg_counted!(works.len(), "Fetching listens");
             } else {
+                pg_inc!(res.payload.listens.len());
                 listens.extend(res.payload.listens);
-                pg_inc!();
             }
         }
 
