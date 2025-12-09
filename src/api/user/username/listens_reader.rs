@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use api_bindium::ApiRequestError;
 use chrono::Utc;
 use snafu::ResultExt;
@@ -28,40 +30,49 @@ impl ListenBrainzAPIEnpoints {
     ) -> Result<Vec<UserListensListen>, ListenFullFetchError> {
         pg_counted!(1, "Fetching listens");
 
-        let mut works = vec![(
+        #[allow(unused_variables)]
+        let mut fetch_count = 1;
+
+        let mut works = VecDeque::from([(
             start.unwrap_or_default(),
             end.unwrap_or_else(|| Utc::now().timestamp() as u64),
-        )];
+        )]);
+
         let mut listens = Vec::new();
 
         let mut min_start = None;
-        while let Some((start, end)) = works.pop() {
+        while let Some((start, end)) = works.pop_front() {
             // Prevent fetching a period that is before any listen
             if min_start.is_some_and(|min_start| end < min_start) {
+                fetch_count -= 1;
+                pg_counted!(fetch_count, "Fetching listens");
                 continue;
             }
 
             // If the period is too big, cut it
             if end - start > 3600 * 24 * 15 {
                 let middle = ((end - start) / 2) + start;
-                works.push((start, middle + 1));
-                works.push((middle, end));
+                works.push_back((start, middle + 1));
+                works.push_back((middle, end));
+                fetch_count += 1;
+                pg_counted!(fetch_count, "Fetching listens");
                 continue;
             }
 
             let res = send_request(client, username, start, end).await?;
-            pg_counted!(res.payload.count, "Fetching listens");
 
             min_start = Some(res.payload.oldest_listen_ts as u64);
 
             // Check if the period overflowed
             if res.payload.listens.len() == 1000 {
                 let middle = ((end - start) / 2) + start;
-                works.push((start, middle + 1));
-                works.push((middle, end));
+                works.push_back((start, middle + 1));
+                works.push_back((middle, end));
+                fetch_count += 1;
+                pg_counted!(fetch_count, "Fetching listens");
             } else {
-                pg_inc!(res.payload.listens.len());
                 listens.extend(res.payload.listens);
+                pg_inc!();
             }
         }
 
