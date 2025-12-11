@@ -1,6 +1,7 @@
 [repository.listenbrainz_rs]
 path="./"
 default_branch="master"
+remote_url = "https://github.com/RustyNova016/listenbrainz_rs"
 
     [repository.listenbrainz_rs.release]
     git_cliff = true
