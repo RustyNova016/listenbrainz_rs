@@ -8,6 +8,12 @@ macro_rules! pg_counted {
             Span::current().pb_set_length($length as u64);
             Span::current().pb_set_message(&format!($($arg)*));
         }
+
+        #[cfg(not(feature = "tracing"))]
+        {
+            // Read the length to prevent "unused variable" lints
+            let _ = $length;
+        }
     };
 }
 
@@ -31,6 +37,11 @@ macro_rules! pg_inc {
             use tracing_indicatif::span_ext::IndicatifSpanExt as _;
 
             Span::current().pb_inc($inc as u64);
+        }
+        #[cfg(not(feature = "tracing"))]
+        {
+            // Read the length to prevent "unused variable" lints
+            let _ = $inc;
         }
     };
 }

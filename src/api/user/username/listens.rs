@@ -2,9 +2,10 @@ use std::collections::HashMap;
 
 use api_bindium::ApiRequest;
 use api_bindium::HTTPVerb;
+use api_bindium::api_request::parsers::json::JsonParser;
+use api_bindium::endpoints::UriBuilderError;
 use serde::Deserialize;
 use serde::Serialize;
-use ureq::http::uri::InvalidUri;
 
 use crate::api::ListenBrainzAPIEnpoints;
 
@@ -17,7 +18,7 @@ impl ListenBrainzAPIEnpoints {
         max_ts: Option<u64>,
         min_ts: Option<u64>,
         count: Option<u64>,
-    ) -> Result<ApiRequest<UserListensResponse>, InvalidUri> {
+    ) -> Result<ApiRequest<JsonParser<UserListensResponse>>, UriBuilderError> {
         self.endpoint_builder()
             .set_path(&format!("/1/user/{username}/listens"))
             .maybe_add_parameter("max_ts", max_ts)

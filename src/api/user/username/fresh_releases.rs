@@ -2,9 +2,10 @@ use core::fmt::Display;
 
 use api_bindium::ApiRequest;
 use api_bindium::HTTPVerb;
+use api_bindium::api_request::parsers::json::JsonParser;
+use api_bindium::endpoints::UriBuilderError;
 use serde::Deserialize;
 use serde::Serialize;
-use ureq::http::uri::InvalidUri;
 
 use crate::api::ListenBrainzAPIEnpoints;
 
@@ -17,7 +18,7 @@ impl ListenBrainzAPIEnpoints {
         sort: Option<FreshReleaseSort>,
         past: Option<bool>,
         future: Option<bool>,
-    ) -> Result<ApiRequest<FreshReleaseResponse>, InvalidUri> {
+    ) -> Result<ApiRequest<JsonParser<FreshReleaseResponse>>, UriBuilderError> {
         self.endpoint_builder()
             .set_path(&format!("/1/user/{username}/fresh_releases"))
             .maybe_add_parameter("sort", sort)

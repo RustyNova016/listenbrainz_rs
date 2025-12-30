@@ -1,6 +1,7 @@
 use api_bindium::ApiRequest;
 use api_bindium::HTTPVerb;
-use ureq::http::uri::InvalidUri;
+use api_bindium::api_request::parsers::json::JsonParser;
+use api_bindium::endpoints::UriBuilderError;
 
 use crate::api::ListenBrainzAPIEnpoints;
 
@@ -8,7 +9,7 @@ impl ListenBrainzAPIEnpoints {
     pub fn post_popularity_recording(
         &self,
         recording_mbids: Vec<String>,
-    ) -> Result<ApiRequest<Vec<PopularityRecordingResponse>>, InvalidUri> {
+    ) -> Result<ApiRequest<JsonParser<Vec<PopularityRecordingResponse>>>, UriBuilderError> {
         self.endpoint_builder()
             .set_path("/1/popularity/recording")
             .into_api_request_with_body(
