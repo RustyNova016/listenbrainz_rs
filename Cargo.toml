@@ -36,7 +36,7 @@ smol-macros = "0.1.1"
 macro_rules_attribute = "0.2.2"
 
 [features]
-default = ["hotpath", "async"]
+default = []
 
 # Async
 sync = ["api_bindium/sync"]
