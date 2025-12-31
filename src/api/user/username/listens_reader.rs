@@ -1,10 +1,10 @@
 use std::collections::VecDeque;
 
 use api_bindium::ApiRequestError;
+use api_bindium::endpoints::UriBuilderError;
 use chrono::Utc;
 use snafu::ResultExt;
 use snafu::Snafu;
-use ureq::http::uri::InvalidUri;
 
 use crate::api::ListenBrainzAPIEnpoints;
 use crate::api::user::username::listens::UserListensListen;
@@ -96,7 +96,7 @@ async fn send_request(
         .max_ts(end)
         .count(1000)
         .call()
-        .context(InvalidUriSnafu)?;
+        .context(UriBuilderSnafu)?;
 
     req.send_async(client.api_client())
         .await
@@ -108,12 +108,18 @@ pub enum ListenFullFetchError {
     ApiRequestError {
         source: ApiRequestError,
 
+        #[snafu(implicit)]
+        location: snafu::Location,
+
         #[cfg(feature = "backtrace")]
         backtrace: snafu::Backtrace,
     },
 
-    InvalidUriError {
-        source: InvalidUri,
+    UriBuilderError {
+        source: UriBuilderError,
+
+        #[snafu(implicit)]
+        location: snafu::Location,
 
         #[cfg(feature = "backtrace")]
         backtrace: snafu::Backtrace,
@@ -132,7 +138,7 @@ mod test {
     #[apply(smol_macros::test!)]
     async fn get_user_username_listens_test() {
         #[cfg(feature = "hotpath")]
-        let _hotpath = hotpath::GuardBuilder::new("test_async_function")
+        let _hotpath = hotpath::FunctionsGuardBuilder::new("test_async_function")
             .percentiles(&[50, 90, 95])
             .format(hotpath::Format::Table)
             .build();
