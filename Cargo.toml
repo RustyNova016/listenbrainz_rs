@@ -16,7 +16,7 @@ rust-version = "1.85.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-api_bindium = {version = "0.1.0", git = "https://github.com/RustyNova016/api_bindium", rev = "76ed9d777fe42c09c0446fd5deb6010560a4f67f"}
+api_bindium = {version = "0.2.0"}
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.145"
 snafu = {version = "0.8.9", features = ["rust_1_81"]}
