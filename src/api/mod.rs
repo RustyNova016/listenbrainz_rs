@@ -3,6 +3,7 @@ use api_bindium::endpoints::path::EndpointUriBuilderPath;
 
 pub mod popularity;
 pub mod user;
+pub mod submit_listens;
 
 #[derive(Debug, bon::Builder, Clone)]
 pub struct ListenBrainzAPIEnpoints {
