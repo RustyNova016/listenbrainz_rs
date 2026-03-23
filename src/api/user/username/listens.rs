@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use api_bindium::ApiRequest;
 use api_bindium::HTTPVerb;
-use api_bindium::api_request::parsers::json::JsonParser;
+use api_bindium::JsonParser;
 use api_bindium::endpoints::UriBuilderError;
 use serde::Deserialize;
 use serde::Serialize;
@@ -24,7 +24,7 @@ impl ListenBrainzAPIEnpoints {
             .maybe_add_parameter("max_ts", max_ts)
             .maybe_add_parameter("min_ts", min_ts)
             .maybe_add_parameter("count", count)
-            .into_api_request(HTTPVerb::Get)
+            .into_api_request(HTTPVerb::Get, JsonParser::default())
     }
 }
 
@@ -105,7 +105,12 @@ mod test {
             .count(1)
             .call()
             .unwrap();
-        let mut res = req.send_async(client.api_client()).await.unwrap();
+        let mut res = req
+            .send_async(client.api_client())
+            .await
+            .unwrap()
+            .parse()
+            .unwrap();
 
         assert_eq!(res.payload.count, 1);
 

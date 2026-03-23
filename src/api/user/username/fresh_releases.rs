@@ -2,7 +2,7 @@ use core::fmt::Display;
 
 use api_bindium::ApiRequest;
 use api_bindium::HTTPVerb;
-use api_bindium::api_request::parsers::json::JsonParser;
+use api_bindium::JsonParser;
 use api_bindium::endpoints::UriBuilderError;
 use serde::Deserialize;
 use serde::Serialize;
@@ -24,7 +24,7 @@ impl ListenBrainzAPIEnpoints {
             .maybe_add_parameter("sort", sort)
             .maybe_add_parameter("past", past)
             .maybe_add_parameter("future", future)
-            .into_api_request(HTTPVerb::Get)
+            .into_api_request(HTTPVerb::Get, JsonParser::default())
     }
 }
 

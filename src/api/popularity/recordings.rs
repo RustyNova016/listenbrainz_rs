@@ -1,6 +1,6 @@
 use api_bindium::ApiRequest;
 use api_bindium::HTTPVerb;
-use api_bindium::api_request::parsers::json::JsonParser;
+use api_bindium::JsonParser;
 use api_bindium::endpoints::UriBuilderError;
 
 use crate::api::ListenBrainzAPIEnpoints;
@@ -15,6 +15,7 @@ impl ListenBrainzAPIEnpoints {
             .into_api_request_with_body(
                 HTTPVerb::Post,
                 serde_json::to_value(PopularityRecordingQuery { recording_mbids }).unwrap(),
+                JsonParser::default(),
             )
     }
 }
@@ -48,7 +49,12 @@ mod test {
             .endpoints()
             .post_popularity_recording(vec!["61c54b0e-3a82-49af-9cc7-73ff34365697".to_string()])
             .unwrap();
-        let mut res = req.send_async(client.api_client()).await.unwrap();
+        let mut res = req
+            .send_async(client.api_client())
+            .await
+            .unwrap()
+            .parse()
+            .unwrap();
 
         let res = res.pop().unwrap();
         assert_eq!(

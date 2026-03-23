@@ -81,7 +81,7 @@ impl ListenBrainzAPIEnpoints {
 }
 
 #[cfg(feature = "async")]
-#[cfg_attr(feature = "hotpath", hotpath::measure)]
+//#[cfg_attr(feature = "hotpath", hotpath::measure)]
 async fn send_request(
     client: &ListenBrainzClient,
     username: &str,
@@ -100,7 +100,9 @@ async fn send_request(
 
     req.send_async(client.api_client())
         .await
-        .context(ApiRequestSnafu)
+        .context(ApiRequestSnafu)?
+        .parse()
+        .context(ParserSnafu)
 }
 
 #[derive(Debug, Snafu)]
@@ -124,6 +126,16 @@ pub enum ListenFullFetchError {
         #[cfg(feature = "backtrace")]
         backtrace: snafu::Backtrace,
     },
+
+    ParserError {
+        source: ApiRequestError,
+
+        #[snafu(implicit)]
+        location: snafu::Location,
+
+        #[cfg(feature = "backtrace")]
+        backtrace: snafu::Backtrace,
+    },
 }
 
 #[cfg(feature = "async")]
@@ -137,12 +149,6 @@ mod test {
 
     #[apply(smol_macros::test!)]
     async fn get_user_username_listens_test() {
-        #[cfg(feature = "hotpath")]
-        let _hotpath = hotpath::FunctionsGuardBuilder::new("test_async_function")
-            .percentiles(&[50, 90, 95])
-            .format(hotpath::Format::Table)
-            .build();
-
         let client = ListenBrainzClient::default();
 
         let req = ListenBrainzAPIEnpoints::get_user_username_listens_full()
