@@ -3,7 +3,7 @@ use std::collections::VecDeque;
 use api_bindium::ApiRequestError;
 use api_bindium::endpoints::UriBuilderError;
 use chrono::Utc;
-use snafu::ResultExt;
+use snafu::ResultExt as _;
 use snafu::Snafu;
 
 use crate::api::ListenBrainzAPIEnpoints;
@@ -30,7 +30,6 @@ impl ListenBrainzAPIEnpoints {
     ) -> Result<Vec<UserListensListen>, ListenFullFetchError> {
         pg_counted!(1, "Fetching listens");
 
-        #[allow(unused_variables)]
         let mut fetch_count = 1;
 
         let mut works = VecDeque::from([(
