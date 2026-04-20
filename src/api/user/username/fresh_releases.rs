@@ -39,7 +39,7 @@ pub enum FreshReleaseSort {
 }
 
 impl Display for FreshReleaseSort {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
             Self::ArtistCreditName => write!(f, "artist_credit_name"),
             Self::Confidence => write!(f, "confidence"),
