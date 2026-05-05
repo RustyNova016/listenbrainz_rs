@@ -1,6 +1,7 @@
 use api_bindium::endpoints::EndpointUriBuilder;
 use api_bindium::endpoints::path::EndpointUriBuilderPath;
 
+pub mod art;
 pub mod metadata;
 pub mod popularity;
 pub mod user;

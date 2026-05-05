@@ -15,15 +15,21 @@ impl ListenBrainzAPIEnpoints {
     pub fn get_user_username_fresh_releases(
         &self,
         username: &str,
+        /// The sort order of the results. 
         sort: Option<FreshReleaseSort>,
+        /// Whether to show releases in the past.
         past: Option<bool>,
+        /// Whether to show releases in the future.
         future: Option<bool>,
+        /// The number of days of fresh releases to show.
+        days: Option<u64>
     ) -> Result<ApiRequest<JsonParser<FreshReleaseResponse>>, UriBuilderError> {
         self.endpoint_builder()
             .set_path(&format!("/1/user/{username}/fresh_releases"))
             .maybe_add_parameter("sort", sort)
             .maybe_add_parameter("past", past)
             .maybe_add_parameter("future", future)
+            .maybe_add_parameter("days", days)
             .into_api_request(HTTPVerb::Get, JsonParser::default())
     }
 }

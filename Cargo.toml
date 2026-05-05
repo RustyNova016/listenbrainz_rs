@@ -30,6 +30,9 @@ tracing-indicatif = {version = "0.3.14", optional = true}
 bon = "3.8.1"
 chrono = "0.4.42"
 async-executor = { version = "1.13.3", optional = true }
+resvg = { version = "0.45.1", optional = true }
+regex = { version = "1.12.3", optional = true }
+base64 = { version = "0.22.1", optional = true }
 
 [dev-dependencies]
 smol-macros = "0.1.1"
@@ -45,6 +48,9 @@ async = ["api_bindium/async", "dep:async-executor"]
 # Fetching
 native_tls = ["api_bindium/native_tls"]
 rate_limit = ["api_bindium/rate_limit"]
+
+# Heavy Features
+art_grid = ["regex", "resvg", "base64"]
 
 # Debugging
 backtrace = ["api_bindium/backtrace"]
