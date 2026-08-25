@@ -16,6 +16,7 @@ Debuging:
 - `backtrace`: Enable error backtraces
 - `tracing`: Enable tracing
 - `hotpath`, `hotpath-alloc`, `hotpath-off`: Enable [hotpath](https://github.com/pawurb/hotpath-rs) debuging / perf analysis.
+- `hotpath-http`: Enable [hotpath http tracing](https://hotpath.rs/http_tracing). Note that it only works if the ureq agent is the default one, or use the default config
 
 
 ## Why another crate? What's so special about it?

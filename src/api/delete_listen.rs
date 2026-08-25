@@ -14,7 +14,7 @@ impl ListenBrainzAPIEnpoints {
         listened_at: u64,
     ) -> Result<ApiRequest<JsonParser<()>>, UriBuilderError> {
         self.endpoint_builder()
-            .set_path(&format!("/1/delete-listen"))
+            .set_path("/1/delete-listen")
             .into_api_request_with_body(
                 HTTPVerb::Post,
                 serde_json::to_value(DeleteListenBody {
