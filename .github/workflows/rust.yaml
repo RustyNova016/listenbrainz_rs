@@ -18,52 +18,38 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-
-      # Install minimal toolchain
-      - name: Install minimal stable toolchain
-        uses: dtolnay/rust-toolchain@stable
+      - uses: cachix/install-nix-action@v25
+      
+      - name: Restore and save Nix store
+        uses: nix-community/cache-nix-action@v7
         with:
-          components: rustfmt, clippy
+          # restore and save a cache using this key
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+          # if there's no cache hit, restore a cache by this prefix
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+          # collect garbage until the Nix store size (in bytes) is at most this number
+          # before trying to save a new cache
+          # 1G = 1073741824
+          gc-max-store-size-linux: 1G
+          # do purge caches
+          purge: true
+          # purge all versions of the cache
+          purge-prefixes: nix-${{ runner.os }}-
+          # created more than this number of seconds ago
+          purge-created: 0
+          # or last accessed this duration (ISO 8601 duration format)
+          # before the start of the `Post Restore and save Nix store` phase
+          purge-last-accessed: P1DT12H
+          # except any version with the key that is the same as the `primary-key`
+          purge-primary-key: never
 
       - uses: Swatinem/rust-cache@v2
-
-      - name: Install cargo-berger for full suite testing
-        run: cargo install --git https://github.com/RustyNova016/cargo-berger --rev 5a56c3dae289b142885705c97e886a0c6f5c4a48 --locked
-
-      - name: Install cargo-hack
-        run: cargo +stable install cargo-hack --locked
-
-      - name: Install cargo-msrv
-        run: cargo install cargo-msrv --all-features
-
-      - name: Install cargo-machete
-        run: cargo install cargo-machete --locked
-
-      # - name: Install cargo-nextest
-      #   run: cargo install cargo-nextest --locked
-
-      # - name: Install cargo-minimal-versions
-      #   run: cargo +stable install cargo-minimal-versions --locked
-
-      - name: Run berger ci
-        run: cargo-berger rust ci
-
-  clippy:
-    env: 
-      SQLX_OFFLINE: true
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-
-      # Install minimal toolchain
-      - name: Install minimal stable toolchain
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy
-
-      - uses: Swatinem/rust-cache@v2
-
-      - uses: taiki-e/install-action@cargo-hack
 
       - name: Run clippy
-        run: cargo hack clippy --each-feature --skip hotpath,hotpath-alloc,hotpath-off -- -D warnings
+        run: nix develop --command cargo hack clippy --each-feature --skip hotpath,hotpath-alloc,hotpath-off -- -D warnings
+
+      - name: Install cargo-berger for full suite testing
+        run: nix develop --command cargo install --git https://github.com/RustyNova016/cargo-berger --rev 5a56c3dae289b142885705c97e886a0c6f5c4a48 --locked
+
+      - name: Run berger ci
+        run: nix develop --command cargo-berger rust ci
